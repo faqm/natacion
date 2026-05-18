@@ -23,15 +23,25 @@ enum Rol {
   ENTRENADOR
 }
 
+model Campeonato {
+  id           Int      @id @default(autoincrement())
+  nombre       String
+  fecha_inicio DateTime
+  fecha_fin    DateTime?
+  eventos      Evento[]
+}
+
 model Evento {
-  id            Int      @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   numero_evento Int
+  campeonato_id Int
+  campeonato    Campeonato  @relation(fields: [campeonato_id], references: [id])
   estilo        Estilo
   distancia     Int
   genero        Genero
   edad_min      Int
   edad_max      Int
-  estado        Estado   @default(PENDIENTE)
+  estado        Estado      @default(PENDIENTE)
   series        Serie[]
 }
 

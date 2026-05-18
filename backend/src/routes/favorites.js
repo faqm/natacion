@@ -14,7 +14,11 @@ router.get('/', authenticateToken, async (req, res) => {
           include: {
             serie: {
               include: {
-                evento: true
+                evento: {
+                  include: {
+                    campeonato: true
+                  }
+                }
               }
             }
           }
@@ -27,7 +31,8 @@ router.get('/', authenticateToken, async (req, res) => {
       return {
         nadador: f.nadador,
         serie: f.nadador.serie,
-        evento: f.nadador.serie.evento
+        evento: f.nadador.serie.evento,
+        campeonato: f.nadador.serie.evento.campeonato
       };
     }).sort((a, b) => {
       // Sort by estimated start time

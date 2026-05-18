@@ -4,20 +4,25 @@ const { authenticateToken, requireRole } = require('./auth');
 
 const router = express.Router();
 
-// Get all events
+// Get all campeonatos with events, series, and swimmers
 router.get('/', async (req, res) => {
   try {
-    const events = await prisma.evento.findMany({
+    const campeonatos = await prisma.campeonato.findMany({
       include: {
-        series: {
+        eventos: {
           include: {
-            nadadores: true
-          }
+            series: {
+              include: {
+                nadadores: true
+              }
+            }
+          },
+          orderBy: { numero_evento: 'asc' }
         }
       },
-      orderBy: { numero_evento: 'asc' }
+      orderBy: { fecha_inicio: 'desc' }
     });
-    res.json(events);
+    res.json(campeonatos);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -55,37 +60,72 @@ router.patch('/:id/estado', authenticateToken, requireRole(['ADMIN', 'COLABORADO
   }
 });
 
-// Seed data route (for testing/development)
+// Seed data route
 router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
   try {
-    // Create dummy event
-    const event = await prisma.evento.create({
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const campeonato = await prisma.campeonato.create({
       data: {
-        numero_evento: 1,
-        estilo: 'CROL',
-        distancia: 50,
-        genero: 'MASCULINO',
-        edad_min: 15,
-        edad_max: 18,
-        estado: 'PENDIENTE',
-        series: {
+        nombre: 'Campeonato Nacional de Verano 2026',
+        fecha_inicio: today,
+        fecha_fin: tomorrow,
+        eventos: {
           create: [
             {
-              numero_serie: 1,
-              hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 35), // 35 minutes from now
-              nadadores: {
+              numero_evento: 1,
+              estilo: 'CROL',
+              distancia: 50,
+              genero: 'MASCULINO',
+              edad_min: 15,
+              edad_max: 18,
+              estado: 'PENDIENTE',
+              series: {
                 create: [
-                  { nombre: 'Juan', apellido: 'Perez', club: 'Club A', tiempo_registro: '00:25.00' },
-                  { nombre: 'Carlos', apellido: 'Gomez', club: 'Club B', tiempo_registro: '00:26.50' }
+                  {
+                    numero_serie: 1,
+                    hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 35), // today
+                    nadadores: {
+                      create: [
+                        { nombre: 'Juan', apellido: 'Perez', club: 'Club A', tiempo_registro: '00:25.00' },
+                        { nombre: 'Carlos', apellido: 'Gomez', club: 'Club B', tiempo_registro: '00:26.50' }
+                      ]
+                    }
+                  },
+                  {
+                    numero_serie: 2,
+                    hora_inicio_estimada: new Date(Date.now() - 1000 * 60 * 60), // past (1 hour ago)
+                    nadadores: {
+                      create: [
+                        { nombre: 'Pedro', apellido: 'Lopez', club: 'Club C', tiempo_registro: '00:24.00' }
+                      ]
+                    }
+                  }
                 ]
               }
             },
             {
-              numero_serie: 2,
-              hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 40), // 40 minutes from now
-              nadadores: {
+              numero_evento: 2,
+              estilo: 'MARIPOSA',
+              distancia: 100,
+              genero: 'FEMENINO',
+              edad_min: 15,
+              edad_max: 18,
+              estado: 'PENDIENTE',
+              series: {
                 create: [
-                  { nombre: 'Pedro', apellido: 'Lopez', club: 'Club C', tiempo_registro: '00:24.00' }
+                  {
+                    numero_serie: 1,
+                    hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 60 * 24), // tomorrow
+                    nadadores: {
+                      create: [
+                        { nombre: 'Ana', apellido: 'Martinez', club: 'Club A', tiempo_registro: '01:10.00' },
+                        { nombre: 'Laura', apellido: 'Diaz', club: 'Club D', tiempo_registro: '01:12.50' }
+                      ]
+                    }
+                  }
                 ]
               }
             }
@@ -93,7 +133,7 @@ router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res)
         }
       }
     });
-    res.json({ message: 'Seed successful', event });
+    res.json({ message: 'Seed successful', campeonato });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
