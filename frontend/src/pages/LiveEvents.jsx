@@ -77,19 +77,19 @@ export default function LiveEvents() {
     };
   }, [socket, user]);
 
-  const toggleFavorite = async (nadadorId) => {
+  const toggleFavorite = async (competidorId) => {
     if (!token) {
       toast.error('Debes iniciar sesión para guardar favoritos');
       return;
     }
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const isFav = isFavorite(nadadorId);
+      const isFav = isFavorite(competidorId);
       if (isFav) {
-        await axios.delete(`${apiUrl}/api/favorites/${nadadorId}`, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.delete(`${apiUrl}/api/favorites/${competidorId}`, { headers: { Authorization: `Bearer ${token}` } });
         toast.success('Eliminado de favoritos');
       } else {
-        await axios.post(`${apiUrl}/api/favorites`, { nadador_id: nadadorId }, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post(`${apiUrl}/api/favorites`, { competidor_id: competidorId }, { headers: { Authorization: `Bearer ${token}` } });
         toast.success('Añadido a favoritos');
       }
       fetchFavorites();
@@ -98,8 +98,8 @@ export default function LiveEvents() {
     }
   };
 
-  const isFavorite = (nadadorId) => {
-    return favorites.some(f => f.nadador.id === nadadorId);
+  const isFavorite = (competidorId) => {
+    return favorites.some(f => f.competidor.id === competidorId);
   };
 
   const renderCountdown = (timeStr) => {
@@ -144,13 +144,14 @@ export default function LiveEvents() {
       }).map(serie => {
         // Filter swimmers by search query
         const q = searchQuery.toLowerCase();
-        const filteredNadadores = serie.nadadores.filter(n => 
-          n.nombre.toLowerCase().includes(q) || 
-          n.apellido.toLowerCase().includes(q) || 
-          n.club.toLowerCase().includes(q)
+        const filteredCompetidores = serie.competidores.filter(c => 
+          c.nadador.nombres.toLowerCase().includes(q) || 
+          c.nadador.apellido_paterno.toLowerCase().includes(q) || 
+          (c.nadador.apellido_materno && c.nadador.apellido_materno.toLowerCase().includes(q)) ||
+          c.club.toLowerCase().includes(q)
         );
-        return { ...serie, nadadores: filteredNadadores };
-      }).filter(serie => serie.nadadores.length > 0 || searchQuery === ''); // Only keep series with matching swimmers if searching
+        return { ...serie, competidores: filteredCompetidores };
+      }).filter(serie => serie.competidores.length > 0 || searchQuery === ''); // Only keep series with matching swimmers if searching
 
       return { ...evento, series: filteredSeries };
     }).filter(evento => evento.series.length > 0); // Only keep events with matching series
@@ -172,7 +173,7 @@ export default function LiveEvents() {
             {favorites.filter(f => f.evento.estado !== 'FINALIZADO').map((fav, i) => (
               <div key={i} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all">
                 <p className="font-bold text-gray-900 dark:text-white text-lg truncate">
-                  {fav.nadador.nombre} {fav.nadador.apellido}
+                  {fav.nadador.nombres} {fav.nadador.apellido_paterno}
                 </p>
                 <div className="mt-2 space-y-1">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -288,27 +289,27 @@ export default function LiveEvents() {
                           </div>
                           
                           <ul className="space-y-2">
-                            {serie.nadadores.map(nadador => (
-                              <li key={nadador.id} className="flex justify-between items-center group bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
+                            {serie.competidores.map(competidor => (
+                              <li key={competidor.id} className="flex justify-between items-center group bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
                                 <div className="flex-1 min-w-0 pr-2">
                                   <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                    {nadador.nombre} {nadador.apellido}
+                                    {competidor.nadador.nombres} {competidor.nadador.apellido_paterno} {competidor.nadador.apellido_materno || ''}
                                   </p>
                                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                    <span className="truncate max-w-[100px]" title={nadador.club}>🏢 {nadador.club}</span>
-                                    <span>⏱️ {nadador.tiempo_registro || 'S/T'}</span>
+                                    <span className="truncate max-w-[100px]" title={competidor.club}>🏢 {competidor.club}</span>
+                                    <span>⏱️ {competidor.tiempo_registro || 'S/T'}</span>
                                   </div>
                                 </div>
                                 <button 
-                                  onClick={() => toggleFavorite(nadador.id)}
+                                  onClick={() => toggleFavorite(competidor.id)}
                                   className={`flex-shrink-0 p-2 rounded-full transition-colors ${
-                                    isFavorite(nadador.id) 
+                                    isFavorite(competidor.id) 
                                       ? 'text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20' 
                                       : 'text-gray-300 hover:text-yellow-500 hover:bg-gray-200 dark:hover:bg-gray-700'
                                   }`}
-                                  title={isFavorite(nadador.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
+                                  title={isFavorite(competidor.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
                                 >
-                                  <svg className="w-6 h-6" fill={isFavorite(nadador.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-6 h-6" fill={isFavorite(competidor.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                                   </svg>
                                 </button>

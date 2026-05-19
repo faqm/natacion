@@ -13,7 +13,9 @@ router.get('/', async (req, res) => {
           include: {
             series: {
               include: {
-                nadadores: true
+                competidores: {
+                  include: { nadador: true }
+                }
               }
             }
           },
@@ -41,7 +43,9 @@ router.patch('/:id/estado', authenticateToken, requireRole(['ADMIN', 'COLABORADO
       include: {
         series: {
           include: {
-            nadadores: true
+            competidores: {
+              include: { nadador: true }
+            }
           }
         }
       }
@@ -87,19 +91,28 @@ router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res)
                   {
                     numero_serie: 1,
                     hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 35), // today
-                    nadadores: {
+                    competidores: {
                       create: [
-                        { nombre: 'Juan', apellido: 'Perez', club: 'Club A', tiempo_registro: '00:25.00' },
-                        { nombre: 'Carlos', apellido: 'Gomez', club: 'Club B', tiempo_registro: '00:26.50' }
+                        { 
+                          club: 'Club A', tiempo_registro: '00:25.00',
+                          nadador: { create: { id: '11111111-1', nombres: 'Juan', apellido_paterno: 'Perez', apellido_materno: 'Gomez', fecha_nacimiento: new Date('2005-01-01'), sexo: 'MASCULINO' } }
+                        },
+                        { 
+                          club: 'Club B', tiempo_registro: '00:26.50',
+                          nadador: { create: { id: '22222222-2', nombres: 'Carlos', apellido_paterno: 'Gomez', apellido_materno: 'Diaz', fecha_nacimiento: new Date('2004-05-10'), sexo: 'MASCULINO' } }
+                        }
                       ]
                     }
                   },
                   {
                     numero_serie: 2,
                     hora_inicio_estimada: new Date(Date.now() - 1000 * 60 * 60), // past (1 hour ago)
-                    nadadores: {
+                    competidores: {
                       create: [
-                        { nombre: 'Pedro', apellido: 'Lopez', club: 'Club C', tiempo_registro: '00:24.00' }
+                        { 
+                          club: 'Club C', tiempo_registro: '00:24.00',
+                          nadador: { create: { id: '33333333-3', nombres: 'Pedro', apellido_paterno: 'Lopez', apellido_materno: 'Ruiz', fecha_nacimiento: new Date('2005-11-20'), sexo: 'MASCULINO' } }
+                        }
                       ]
                     }
                   }
@@ -119,10 +132,16 @@ router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res)
                   {
                     numero_serie: 1,
                     hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 60 * 24), // tomorrow
-                    nadadores: {
+                    competidores: {
                       create: [
-                        { nombre: 'Ana', apellido: 'Martinez', club: 'Club A', tiempo_registro: '01:10.00' },
-                        { nombre: 'Laura', apellido: 'Diaz', club: 'Club D', tiempo_registro: '01:12.50' }
+                        { 
+                          club: 'Club A', tiempo_registro: '01:10.00',
+                          nadador: { create: { id: '44444444-4', nombres: 'Ana', apellido_paterno: 'Martinez', apellido_materno: 'Soto', fecha_nacimiento: new Date('2006-02-15'), sexo: 'FEMENINO' } }
+                        },
+                        { 
+                          club: 'Club D', tiempo_registro: '01:12.50',
+                          nadador: { create: { id: '55555555-5', nombres: 'Laura', apellido_paterno: 'Diaz', apellido_materno: 'Vera', fecha_nacimiento: new Date('2006-08-30'), sexo: 'FEMENINO' } }
+                        }
                       ]
                     }
                   }

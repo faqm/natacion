@@ -65,18 +65,28 @@ enum Estado {
 }
 
 model Serie {
-  id                   Int       @id @default(autoincrement())
+  id                   Int          @id @default(autoincrement())
   numero_serie         Int
   hora_inicio_estimada DateTime?
   evento_id            Int
-  evento               Evento    @relation(fields: [evento_id], references: [id])
-  nadadores            Nadador[]
+  evento               Evento       @relation(fields: [evento_id], references: [id])
+  competidores         Competidor[]
 }
 
 model Nadador {
+  id               String       @id // RUT
+  nombres          String
+  apellido_paterno String
+  apellido_materno String?
+  fecha_nacimiento DateTime
+  sexo             Genero
+  competidores     Competidor[]
+}
+
+model Competidor {
   id              Int         @id @default(autoincrement())
-  nombre          String
-  apellido        String
+  nadador_id      String
+  nadador         Nadador     @relation(fields: [nadador_id], references: [id])
   club            String
   tiempo_registro String?     // e.g., "01:23.45"
   serie_id        Int
@@ -85,11 +95,11 @@ model Nadador {
 }
 
 model Favoritos {
-  id         Int     @id @default(autoincrement())
-  usuario_id Int
-  nadador_id Int
-  usuario    Usuario @relation(fields: [usuario_id], references: [id])
-  nadador    Nadador @relation(fields: [nadador_id], references: [id])
+  id            Int         @id @default(autoincrement())
+  usuario_id    Int
+  competidor_id Int
+  usuario       Usuario     @relation(fields: [usuario_id], references: [id])
+  competidor    Competidor  @relation(fields: [competidor_id], references: [id])
 
-  @@unique([usuario_id, nadador_id])
+  @@unique([usuario_id, competidor_id])
 }

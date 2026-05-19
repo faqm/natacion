@@ -54,9 +54,10 @@ setInterval(async () => {
       },
       include: {
         evento: true,
-        nadadores: {
+        competidores: {
           include: {
-            favoritos: true
+            favoritos: true,
+            nadador: true
           }
         }
       }
@@ -70,8 +71,8 @@ setInterval(async () => {
       if ([30, 15, 5].includes(diffMinutes)) {
         // Find users who favorited swimmers in this series
         const usersToNotify = new Set();
-        serie.nadadores.forEach(nadador => {
-          nadador.favoritos.forEach(fav => {
+        serie.competidores.forEach(competidor => {
+          competidor.favoritos.forEach(fav => {
             usersToNotify.add(fav.usuario_id);
           });
         });

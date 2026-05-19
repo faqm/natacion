@@ -85,9 +85,9 @@ export default function Dashboard() {
                           <p className="font-medium text-gray-900 dark:text-gray-100">Serie #{serie.numero_serie}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Inicio: {serie.hora_inicio_estimada ? new Date(serie.hora_inicio_estimada).toLocaleTimeString() : 'N/A'}</p>
                           <ul className="space-y-1">
-                            {serie.nadadores.map(nadador => (
-                              <li key={nadador.id} className="text-xs text-gray-700 dark:text-gray-300">
-                                {nadador.nombre} {nadador.apellido} ({nadador.club}) - {nadador.tiempo_registro || 'S/T'}
+                            {serie.competidores.map(competidor => (
+                              <li key={competidor.id} className="text-xs text-gray-700 dark:text-gray-300">
+                                {competidor.nadador.nombres} {competidor.nadador.apellido_paterno} {competidor.nadador.apellido_materno || ''} ({competidor.club}) - {competidor.tiempo_registro || 'S/T'}
                               </li>
                             ))}
                           </ul>

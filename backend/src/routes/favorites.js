@@ -10,8 +10,9 @@ router.get('/', authenticateToken, async (req, res) => {
     const favorites = await prisma.favoritos.findMany({
       where: { usuario_id: req.user.id },
       include: {
-        nadador: {
+        competidor: {
           include: {
+            nadador: true,
             serie: {
               include: {
                 evento: {
@@ -29,10 +30,11 @@ router.get('/', authenticateToken, async (req, res) => {
     // Map to a cleaner format and calculate time to event
     const upcomingEvents = favorites.map(f => {
       return {
-        nadador: f.nadador,
-        serie: f.nadador.serie,
-        evento: f.nadador.serie.evento,
-        campeonato: f.nadador.serie.evento.campeonato
+        competidor: f.competidor,
+        nadador: f.competidor.nadador,
+        serie: f.competidor.serie,
+        evento: f.competidor.serie.evento,
+        campeonato: f.competidor.serie.evento.campeonato
       };
     }).sort((a, b) => {
       // Sort by estimated start time
@@ -51,12 +53,12 @@ router.get('/', authenticateToken, async (req, res) => {
 // Add favorite
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { nadador_id } = req.body;
+    const { competidor_id } = req.body;
     
     const favorite = await prisma.favoritos.create({
       data: {
         usuario_id: req.user.id,
-        nadador_id: parseInt(nadador_id)
+        competidor_id: parseInt(competidor_id)
       }
     });
     res.json(favorite);
@@ -67,14 +69,14 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // Remove favorite
-router.delete('/:nadador_id', authenticateToken, async (req, res) => {
+router.delete('/:competidor_id', authenticateToken, async (req, res) => {
   try {
-    const { nadador_id } = req.params;
+    const { competidor_id } = req.params;
     
     await prisma.favoritos.deleteMany({
       where: {
         usuario_id: req.user.id,
-        nadador_id: parseInt(nadador_id)
+        competidor_id: parseInt(competidor_id)
       }
     });
     res.json({ success: true });
