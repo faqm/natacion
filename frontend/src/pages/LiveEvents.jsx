@@ -3,7 +3,7 @@ import axios from 'axios';
 import { SocketContext } from '../context/SocketContext';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { formatDistanceToNow, isPast, format } from 'date-fns';
+import { formatDistanceToNow, isPast, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function LiveEvents() {
