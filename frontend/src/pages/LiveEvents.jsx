@@ -300,7 +300,7 @@ export default function LiveEvents() {
                                   </p>
                                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                     <span className="truncate max-w-[100px]" title={competidor.club}>🏢 {competidor.club}</span>
-                                    <span>⏱️ {competidor.tiempo_registro || 'S/T'}</span>
+                                    <span>⏱️ {competidor.tiempo_registro || 'S/T'}</span>hola
                                   </div>
                                 </div>
                                 <button 
