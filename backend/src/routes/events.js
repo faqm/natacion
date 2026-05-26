@@ -65,7 +65,7 @@ router.patch('/:id/estado', authenticateToken, requireRole(['ADMIN', 'COLABORADO
 });
 
 // Seed data route
-router.post('/seed-public', async (req, res) => {
+router.get('/seed-public', async (req, res) => {
   try {
     const today = new Date();
     const tomorrow = new Date(today);
