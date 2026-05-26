@@ -65,7 +65,7 @@ router.patch('/:id/estado', authenticateToken, requireRole(['ADMIN', 'COLABORADO
 });
 
 // Seed data route
-router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+router.post('/seed-public', async (req, res) => {
   try {
     const today = new Date();
     const tomorrow = new Date(today);
@@ -90,7 +90,7 @@ router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res)
                 create: [
                   {
                     numero_serie: 1,
-                    hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 35), // today
+                    hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 35),
                     competidores: {
                       create: [
                         { 
@@ -106,7 +106,7 @@ router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res)
                   },
                   {
                     numero_serie: 2,
-                    hora_inicio_estimada: new Date(Date.now() - 1000 * 60 * 60), // past (1 hour ago)
+                    hora_inicio_estimada: new Date(Date.now() - 1000 * 60 * 60),
                     competidores: {
                       create: [
                         { 
@@ -131,7 +131,7 @@ router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res)
                 create: [
                   {
                     numero_serie: 1,
-                    hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 60 * 24), // tomorrow
+                    hora_inicio_estimada: new Date(Date.now() + 1000 * 60 * 60 * 24),
                     competidores: {
                       create: [
                         { 
@@ -152,7 +152,7 @@ router.post('/seed', authenticateToken, requireRole(['ADMIN']), async (req, res)
         }
       }
     });
-    res.json({ message: 'Seed successful', campeonato });
+    res.json({ message: 'Seed successful (public)', campeonato });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
