@@ -238,7 +238,7 @@ export default function LiveEvents() {
         <div className="p-6 space-y-8">
           {filteredEvents.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-              No se encontraron eventos o nadadores con esos filtros.
+              No se encontraron eventos o nadadores con esos filtros. hola
             </div>
           ) : (
             filteredEvents.map((evento) => {
@@ -300,7 +300,7 @@ export default function LiveEvents() {
                                   </p>
                                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                     <span className="truncate max-w-[100px]" title={competidor.club}>🏢 {competidor.club}</span>
-                                    <span>⏱️ {competidor.tiempo_registro || 'S/T'}</span>hola
+                                    <span>⏱️ {competidor.tiempo_registro || 'S/T'}</span>
                                   </div>
                                 </div>
                                 <button 
