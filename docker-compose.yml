@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: natacion-db
+    environment:
+      POSTGRES_USER: natacion_user
+      POSTGRES_PASSWORD: natacion_password
+      POSTGRES_DB: natacion
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
