@@ -238,7 +238,7 @@ export default function LiveEvents() {
         <div className="p-6 space-y-8">
           {filteredEvents.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-              No se encontraron eventos o nadadores con esos filtros. hola
+              No se encontraron eventos o nadadores con esos filtros.
             </div>
           ) : (
             filteredEvents.map((evento) => {

@@ -5,6 +5,8 @@ import { toast } from 'react-hot-toast';
 
 export default function Dashboard() {
   const [campeonatos, setCampeonatos] = useState([]);
+  const [isCreatingCamp, setIsCreatingCamp] = useState(false);
+  const [newCampData, setNewCampData] = useState({ nombre: '', fecha_inicio: '', fecha_fin: '' });
   const [newEventCampId, setNewEventCampId] = useState(null);
   const [newEventData, setNewEventData] = useState({ numero_evento: '', estilo: 'CROL', distancia: '50', genero: 'MASCULINO', edad_min: '15', edad_max: '18' });
   const { token } = useContext(AuthContext);
@@ -48,6 +50,22 @@ export default function Dashboard() {
       fetchCampeonatos();
     } catch (error) {
       toast.error('Error al registrar la hora');
+    }
+  };
+
+  const handleCreateCampeonato = async (e) => {
+    e.preventDefault();
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      await axios.post(`${apiUrl}/api/events/campeonato`, newCampData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Campeonato creado');
+      setIsCreatingCamp(false);
+      setNewCampData({ nombre: '', fecha_inicio: '', fecha_fin: '' });
+      fetchCampeonatos();
+    } catch (error) {
+      toast.error('Error al crear campeonato');
     }
   };
 
@@ -100,10 +118,39 @@ export default function Dashboard() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Panel de Control (Admin)</h1>
-        <button onClick={generateSeedData} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500">
-          Generar Datos de Prueba
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setIsCreatingCamp(!isCreatingCamp)} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 font-bold">
+            + Nuevo Campeonato
+          </button>
+          <button onClick={generateSeedData} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500">
+            Generar Datos de Prueba
+          </button>
+        </div>
       </div>
+
+      {isCreatingCamp && (
+        <form onSubmit={handleCreateCampeonato} className="mb-8 p-6 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-sm">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Crear Nuevo Campeonato</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-bold mb-1 text-gray-700 dark:text-gray-300">Nombre del Campeonato</label>
+              <input type="text" required className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Ej: Nacional de Verano" value={newCampData.nombre} onChange={e => setNewCampData({...newCampData, nombre: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-1 text-gray-700 dark:text-gray-300">Fecha de Inicio</label>
+              <input type="date" required className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" value={newCampData.fecha_inicio} onChange={e => setNewCampData({...newCampData, fecha_inicio: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-1 text-gray-700 dark:text-gray-300">Fecha de Fin (Opcional)</label>
+              <input type="date" className="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" value={newCampData.fecha_fin} onChange={e => setNewCampData({...newCampData, fecha_fin: e.target.value})} />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-500">Guardar Campeonato</button>
+            <button type="button" className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500" onClick={() => setIsCreatingCamp(false)}>Cancelar</button>
+          </div>
+        </form>
+      )}
 
       <div className="space-y-8">
         {campeonatos.map(camp => (
@@ -184,6 +231,9 @@ export default function Dashboard() {
                         <div key={serie.id} className="bg-white dark:bg-gray-700 p-3 rounded-lg border dark:border-gray-600 flex flex-col justify-between">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-gray-100">Serie #{serie.numero_serie}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
+                              Programada: {serie.hora_inicio_programada ? new Date(serie.hora_inicio_programada).toLocaleTimeString() : 'N/A'}
+                            </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                               Estimada: {serie.hora_inicio_estimada ? new Date(serie.hora_inicio_estimada).toLocaleTimeString() : 'N/A'}
                             </p>
