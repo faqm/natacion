@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id         Int         @id @default(autoincrement())
+  email      String      @unique
+  password   String
+  verificado Boolean     @default(false)
+  rol        Rol         @default(GENERAL)
+  favoritos  Favoritos[]
+}
+
+enum Rol {
+  ADMIN
+  GENERAL
+  COLABORADOR
+  ENTRENADOR
+}
+
+model Campeonato {
+  id           Int      @id @default(autoincrement())
+  nombre       String
+  fecha_inicio DateTime
+  fecha_fin    DateTime?
+  eventos      Evento[]
+}
+
+model Evento {
+  id            Int         @id @default(autoincrement())
+  numero_evento Int
+  campeonato_id Int
+  campeonato    Campeonato  @relation(fields: [campeonato_id], references: [id])
+  estilo        Estilo
+  distancia     Int
+  genero        Genero
+  edad_min      Int
+  edad_max      Int
+  estado        Estado      @default(PENDIENTE)
+  series        Serie[]
+}
+
+enum Estilo {
+  CROL
+  MARIPOSA
+  PECHO
+  ESPALDA
+}
+
+enum Genero {
+  MASCULINO
+  FEMENINO
+  MIXTO
+}
+
+enum Estado {
+  PENDIENTE
+  EN_CURSO
+  FINALIZADO
+}
+
+model Serie {
+  id                   Int          @id @default(autoincrement())
+  numero_serie         Int
+  hora_inicio_estimada DateTime?
+  evento_id            Int
+  evento               Evento       @relation(fields: [evento_id], references: [id])
+  competidores         Competidor[]
+}
+
+model Nadador {
+  id               String       @id // RUT
+  nombres          String
+  apellido_paterno String
+  apellido_materno String?
+  fecha_nacimiento DateTime
+  sexo             Genero
+  competidores     Competidor[]
+}
+
+model Competidor {
+  id              Int         @id @default(autoincrement())
+  nadador_id      String
+  nadador         Nadador     @relation(fields: [nadador_id], references: [id])
+  club            String
+  tiempo_registro String?     // e.g., "01:23.45"
+  serie_id        Int
+  serie           Serie       @relation(fields: [serie_id], references: [id])
+  favoritos       Favoritos[]
+}
+
+model Favoritos {
+  id            Int         @id @default(autoincrement())
+  usuario_id    Int
+  competidor_id Int
+  usuario       Usuario     @relation(fields: [usuario_id], references: [id])
+  competidor    Competidor  @relation(fields: [competidor_id], references: [id])
+
+  @@unique([usuario_id, competidor_id])
+}
