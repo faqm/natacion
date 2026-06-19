@@ -50,6 +50,7 @@ enum Estilo {
   MARIPOSA
   PECHO
   ESPALDA
+  LIBRE
 }
 
 enum Genero {
