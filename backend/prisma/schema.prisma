@@ -51,7 +51,7 @@ enum Estilo {
   PECHO
   ESPALDA
   LIBRE
-  COMBINADO INDIVIDUAL
+  COMBINADO_INDIVIDUAL
 }
 
 enum Genero {
