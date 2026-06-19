@@ -4,6 +4,7 @@ const { authenticateToken, requireRole } = require('./auth');
 const multer = require('multer');
 const xlsx = require('xlsx');
 
+const express = require('express');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 

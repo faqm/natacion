@@ -3,6 +3,7 @@
 // All dates are stored in the database as UTC. The functions below convert between
 // UTC and a configurable default time zone (e.g., the local zone of the competition).
 
+// Load date-fns-tz functions safely for both ESM and CJS imports
 const { utcToZonedTime, zonedTimeToUtc, format } = require('date-fns-tz');
 
 // Default time zone for the application – can be changed via environment variable
@@ -34,5 +35,7 @@ function formatInTZ(utcDate, tz = DEFAULT_TZ, fmt = "yyyy-MM-dd HH:mm:ss XXX") {
   const zoned = utcToZonedTime(d, tz);
   return format(zoned, fmt, { timeZone: tz });
 }
+
+
 
 module.exports = { toUTC, formatInTZ, DEFAULT_TZ };
