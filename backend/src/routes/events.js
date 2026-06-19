@@ -1,4 +1,4 @@
-const express = require('express');
+const { toUTC, formatInTZ, DEFAULT_TZ } = require('../utils/time');
 const prisma = require('../lib/prisma');
 const { authenticateToken, requireRole } = require('./auth');
 const multer = require('multer');
@@ -27,7 +27,23 @@ router.get('/', async (req, res) => {
       },
       orderBy: { fecha_inicio: 'desc' }
     });
-    res.json(campeonatos);
+
+    // Format DateTime fields to the configured timezone before sending
+    const tz = DEFAULT_TZ; // could be overridden by a query param later
+    const formatted = campeonatos.map(c => ({
+      ...c,
+      eventos: c.eventos.map(ev => ({
+        ...ev,
+        series: ev.series.map(s => ({
+          ...s,
+          hora_inicio_programada: s.hora_inicio_programada ? formatInTZ(s.hora_inicio_programada, tz) : null,
+          hora_inicio_estimada: s.hora_inicio_estimada ? formatInTZ(s.hora_inicio_estimada, tz) : null,
+          hora_inicio_real: s.hora_inicio_real ? formatInTZ(s.hora_inicio_real, tz) : null,
+        }))
+      }))
+    }));
+
+    res.json(formatted);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -87,12 +103,13 @@ router.patch('/series/:id/start', authenticateToken, requireRole(['ADMIN', 'COLA
     // The absolute delay relative to the scheduled time
     const absoluteDelayMs = realStartTime.getTime() - progTime.getTime();
 
-    // Update the real start time and estimated time of this serie
+    const realStartUTC = toUTC(realStartTime);
+    // Update the real start time and estimated time of this serie using UTC
     const updatedSerie = await prisma.serie.update({
       where: { id: parseInt(id) },
       data: { 
-        hora_inicio_real: realStartTime,
-        hora_inicio_estimada: realStartTime 
+        hora_inicio_real: realStartUTC,
+        hora_inicio_estimada: realStartUTC 
       }
     });
 
@@ -177,6 +194,50 @@ router.post('/', authenticateToken, requireRole(['ADMIN']), async (req, res) => 
     });
     
     res.json(newEvent);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Upload Excel to populate Campeonato with Eventos (Admin)
+router.post('/campeonato/:id/upload-events', authenticateToken, requireRole(['ADMIN']), upload.single('file'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    // Expected columns: NumeroEvento, Estilo, Distancia, Genero, EdadMin, EdadMax
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    for (const row of data) {
+      const numEvento = parseInt(row['NumeroEvento']);
+      if (!numEvento) continue;
+
+      // Find if event exists by campeonato_id and numero_evento, otherwise create
+      let evento = await prisma.evento.findFirst({
+        where: { campeonato_id: parseInt(id), numero_evento: numEvento }
+      });
+      
+      if (!evento) {
+        await prisma.evento.create({
+          data: {
+            campeonato_id: parseInt(id),
+            numero_evento: numEvento,
+            estilo: row['Estilo'] || 'CROL',
+            distancia: parseInt(row['Distancia']) || 50,
+            genero: row['Genero'] === 'F' ? 'FEMENINO' : (row['Genero'] === 'M' ? 'MASCULINO' : 'MIXTO'),
+            edad_min: parseInt(row['EdadMin']) || 0,
+            edad_max: parseInt(row['EdadMax']) || 99,
+            estado: 'PENDIENTE'
+          }
+        });
+      }
+    }
+
+    res.json({ message: 'Eventos loaded successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
