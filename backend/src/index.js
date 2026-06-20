@@ -3,7 +3,17 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const prisma = require('./lib/prisma');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const { seedDatabase } = require('./seed');
+
+(async () => {
+  const count = await prisma.campeonato.count();
+  if (count === 0) {
+    console.log('No campeonatos found, seeding database...');
+    await seedDatabase();
+  }
+})();
 
 dotenv.config();
 

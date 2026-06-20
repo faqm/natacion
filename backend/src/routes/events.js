@@ -29,22 +29,8 @@ router.get('/', async (req, res) => {
       orderBy: { fecha_inicio: 'desc' }
     });
 
-    // Format DateTime fields to the configured timezone before sending
-    const tz = DEFAULT_TZ; // could be overridden by a query param later
-    const formatted = campeonatos.map(c => ({
-      ...c,
-      eventos: c.eventos.map(ev => ({
-        ...ev,
-        series: ev.series.map(s => ({
-          ...s,
-          hora_inicio_programada: s.hora_inicio_programada ? formatInTZ(s.hora_inicio_programada, tz) : null,
-          hora_inicio_estimada: s.hora_inicio_estimada ? formatInTZ(s.hora_inicio_estimada, tz) : null,
-          hora_inicio_real: s.hora_inicio_real ? formatInTZ(s.hora_inicio_real, tz) : null,
-        }))
-      }))
-    }));
-
-    res.json(formatted);
+    // Return raw data; dates are ISO strings suitable for frontend parsing
+    res.json(campeonatos);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
