@@ -5,7 +5,7 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const { seedDatabase } = require('./seed');
+const { seedDatabase } = require('../seed');
 
 (async () => {
   const count = await prisma.campeonato.count();
