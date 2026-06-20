@@ -50,8 +50,6 @@ enum Estilo {
   MARIPOSA
   PECHO
   ESPALDA
-  LIBRE
-  COMBINADO_INDIVIDUAL @map("COMBINADO INDIVIDUAL")
 }
 
 enum Genero {
